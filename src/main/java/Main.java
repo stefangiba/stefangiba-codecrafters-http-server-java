@@ -18,16 +18,21 @@ public class Main {
       serverSocket = new ServerSocket(4221);
       serverSocket.setReuseAddress(true);
       clientSocket = serverSocket.accept(); // Wait for connection from client.
-      
+
       System.out.println("accepted new connection");
       // handle incoming connection
-      InputStream is = clientSocket.getInputStream();
-      String request = readRequest(is);
-      System.out.println(request);
+      // var inputStream = clientSocket.getInputStream();
+      // var request = readRequest(inputStream);
+      // System.out.println(request);
 
-      OutputStream os = clientSocket.getOutputStream();
-      os.write(HTTP_OK.getBytes());
-      os.flush();
+      System.out.println("sending response...");
+      try (var outputStream = clientSocket.getOutputStream()) {
+        System.out.println("writing bytes to socket...");
+        outputStream.write(HTTP_OK.getBytes());
+        System.out.println("wrote bytes to socket");
+        outputStream.flush();
+        outputStream.close();
+      }
 
       serverSocket.close();
       clientSocket.close();
@@ -40,10 +45,14 @@ public class Main {
     int bufferSize = 1024;
     char[] buffer = new char[bufferSize];
     StringBuilder out = new StringBuilder();
-    Reader in = new InputStreamReader(is, StandardCharsets.UTF_8);
 
-    for (int numRead; (numRead = in.read(buffer, 0, buffer.length)) > 0;) {
-      out.append(buffer, 0, numRead);
+    System.out.println("Reading input stream...");
+
+    try (Reader in = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+      for (int numRead = 0; (numRead = in.read(buffer)) > 0;) {
+        System.out.println(numRead);
+        out.append(buffer, 0, numRead);
+      }
     }
 
     return out.toString();
