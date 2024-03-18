@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -17,11 +18,19 @@ public class Main {
       serverSocket = new ServerSocket(4221);
       serverSocket.setReuseAddress(true);
       clientSocket = serverSocket.accept(); // Wait for connection from client.
+      
       System.out.println("accepted new connection");
       // handle incoming connection
       InputStream is = clientSocket.getInputStream();
       String request = readRequest(is);
-      clientSocket.getOutputStream().write(HTTP_OK.getBytes());
+      System.out.println(request);
+
+      OutputStream os = clientSocket.getOutputStream();
+      os.write(HTTP_OK.getBytes());
+      os.flush();
+
+      serverSocket.close();
+      clientSocket.close();
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
     }
@@ -32,7 +41,7 @@ public class Main {
     char[] buffer = new char[bufferSize];
     StringBuilder out = new StringBuilder();
     Reader in = new InputStreamReader(is, StandardCharsets.UTF_8);
-    
+
     for (int numRead; (numRead = in.read(buffer, 0, buffer.length)) > 0;) {
       out.append(buffer, 0, numRead);
     }
