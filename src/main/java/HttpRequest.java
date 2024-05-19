@@ -7,14 +7,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class Request {
+public final class HttpRequest {
   private final HttpMethod httpMethod;
   private final HttpVersion httpVersion;
   private final String path;
   private final Map<String, String> headers;
   private final String body;
 
-  private Request(
+  private HttpRequest(
       HttpMethod httpMethod,
       HttpVersion httpVersion,
       String path,
@@ -47,7 +47,7 @@ public final class Request {
     return body;
   }
 
-  public static Request readFrom(InputStream is) throws IOException {
+  public static HttpRequest readFrom(InputStream is) throws IOException {
     System.out.println("Reading input stream...");
 
     BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
@@ -77,7 +77,7 @@ public final class Request {
 
     System.out.println("Read request!");
 
-    return new Request(httpMethod, httpVersion, path, headers, readBody(reader, contentLength));
+    return new HttpRequest(httpMethod, httpVersion, path, headers, readBody(reader, contentLength));
   }
 
   private static final Map<String, String> readHeaders(BufferedReader reader) throws IOException {
