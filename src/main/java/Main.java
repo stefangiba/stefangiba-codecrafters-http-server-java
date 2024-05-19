@@ -3,11 +3,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Optional;
 
 public class Main {
   private static final String HTTP_OK = "HTTP/1.1 200 OK\r\n\r\n";
   private static final String HTTP_NOT_FOUND = "HTTP/1.1 404 Not Found\r\n\r\n";
+  private static final String HTTP_RESPONSE = "HTTP/1.1 200 OK\r\nContent-type: %s\r\nContent-Length: %d\r\n\r\n%s";
 
   public static void main(String[] args) throws InterruptedException {
     try (
@@ -19,21 +19,26 @@ public class Main {
 
       System.out.println("accepted new connection");
       // handle incoming connection
-      Request request = Request.readFrom(inputStream);
-      System.out.println(request.getPath());
-      System.out.println(request.getHttpMethod());
-      System.out.println(request.getHttpVersion());
+      HttpRequest request = HttpRequest.readFrom(inputStream);
+
+      String response = switch (request.getPath()) {
+        case "/" -> HTTP_OK;
+        case String s when s.startsWith("/echo") -> buildEchoResponse(s);
+        default -> HTTP_NOT_FOUND;
+      };
 
       System.out.println("sending response...");
-      if ("/".equals(request.getPath())) {
-        outputStream.write(HTTP_OK.getBytes());
-      } else {
-        outputStream.write(HTTP_NOT_FOUND.getBytes());
-      }
+      outputStream.write(response.getBytes());
 
       System.out.println("wrote bytes to socket");
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private static String buildEchoResponse(String path) {
+    String[] parts = path.split("/");
+    String param = parts[2];
+    return String.format(HTTP_RESPONSE, "text/plain", param.length(), param);
   }
 }
