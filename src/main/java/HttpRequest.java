@@ -48,8 +48,6 @@ public final class HttpRequest {
   }
 
   public static HttpRequest readFrom(InputStream is) throws IOException {
-    System.out.println("Reading input stream...");
-
     BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 
     String requestLine = reader.readLine();
@@ -74,8 +72,6 @@ public final class HttpRequest {
     if (headers.containsKey("Content-Length")) {
       contentLength = Integer.parseInt(headers.get("Content-Length"));
     }
-
-    System.out.println("Read request!");
 
     return new HttpRequest(httpMethod, httpVersion, path, headers, readBody(reader, contentLength));
   }
