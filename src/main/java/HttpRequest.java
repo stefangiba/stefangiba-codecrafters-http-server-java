@@ -39,27 +39,27 @@ public final class HttpRequest {
     return path;
   }
 
-  public Map<String, String> getHeaders() {
-    return headers;
+  public String getHeader(String headerName) {
+    return headers.get(headerName);
   }
 
   public String getBody() {
     return body;
   }
 
-  public static HttpRequest readFrom(InputStream is) throws IOException {
+  public static HttpRequest readFrom(InputStream is) throws IllegalArgumentException, IOException {
     BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 
     String requestLine = reader.readLine();
 
     if (requestLine == null) {
-      throw new IOException("Request line is null");
+      throw new IllegalArgumentException("Request line is null");
     }
 
     String[] parts = requestLine.split(" ");
 
     if (parts.length != 3) {
-      throw new IOException("Request line is malformed");
+      throw new IllegalArgumentException("Request line is malformed");
     }
 
     HttpMethod httpMethod = HttpMethod.valueOf(parts[0]);

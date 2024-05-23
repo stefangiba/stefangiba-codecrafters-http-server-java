@@ -3,34 +3,48 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
   private static final String HTTP_OK = "HTTP/1.1 200 OK\r\n\r\n";
   private static final String HTTP_NOT_FOUND = "HTTP/1.1 404 Not Found\r\n\r\n";
   private static final String HTTP_RESPONSE = "HTTP/1.1 200 OK\r\nContent-type: %s\r\nContent-Length: %d\r\n\r\n%s";
+  private static final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
-  public static void main(String[] args) throws InterruptedException {
-    try (
-        ServerSocket serverSocket = new ServerSocket(4221);
+  public static void main(String[] args) throws InterruptedException, IOException {
+    ServerSocket serverSocket = new ServerSocket(4221);
+
+    try {
+      while (true) {
         Socket clientSocket = serverSocket.accept(); // Wait for connection from client.
-        InputStream inputStream = clientSocket.getInputStream();
-        OutputStream outputStream = clientSocket.getOutputStream()) {
-      serverSocket.setReuseAddress(true);
 
-      // handle incoming connection
-      HttpRequest request = HttpRequest.readFrom(inputStream);
+        executorService.submit(() -> {
+          try (
+              InputStream inputStream = clientSocket.getInputStream();
+              OutputStream outputStream = clientSocket.getOutputStream()) {
+            serverSocket.setReuseAddress(true);
 
-      String response = switch (request.getPath()) {
-        case "/" -> HTTP_OK;
-        case String path when path.startsWith("/echo") -> buildTextResponse(path.split("/")[2]);
-        case String path when path.startsWith("/user-agent") ->
-          buildTextResponse(request.getHeaders().get("User-Agent"));
-        default -> HTTP_NOT_FOUND;
-      };
+            // handle incoming connection
+            HttpRequest request = HttpRequest.readFrom(inputStream);
 
-      outputStream.write(response.getBytes());
-    } catch (IOException e) {
-      e.printStackTrace();
+            String response = switch (request.getPath()) {
+              case "/" -> HTTP_OK;
+              case String path when path.startsWith("/echo") -> buildTextResponse(path.split("/")[2]);
+              case String path when path.startsWith("/user-agent") ->
+                buildTextResponse(request.getHeader("User-Agent"));
+              default -> HTTP_NOT_FOUND;
+            };
+
+            outputStream.write(response.getBytes());
+          } catch (IOException | IllegalArgumentException e) {
+            e.printStackTrace();
+          }
+        });
+      }
+    } finally {
+      executorService.shutdown();
+      serverSocket.close();
     }
   }
 
