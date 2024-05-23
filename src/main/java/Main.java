@@ -17,28 +17,24 @@ public class Main {
         OutputStream outputStream = clientSocket.getOutputStream()) {
       serverSocket.setReuseAddress(true);
 
-      System.out.println("accepted new connection");
       // handle incoming connection
       HttpRequest request = HttpRequest.readFrom(inputStream);
 
       String response = switch (request.getPath()) {
         case "/" -> HTTP_OK;
-        case String s when s.startsWith("/echo") -> buildEchoResponse(s);
+        case String path when path.startsWith("/echo") -> buildTextResponse(path.split("/")[2]);
+        case String path when path.startsWith("/user-agent") ->
+          buildTextResponse(request.getHeaders().get("User-Agent"));
         default -> HTTP_NOT_FOUND;
       };
 
-      System.out.println("sending response...");
       outputStream.write(response.getBytes());
-
-      System.out.println("wrote bytes to socket");
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  private static String buildEchoResponse(String path) {
-    String[] parts = path.split("/");
-    String param = parts[2];
-    return String.format(HTTP_RESPONSE, "text/plain", param.length(), param);
+  private static String buildTextResponse(String content) {
+    return String.format(HTTP_RESPONSE, "text/plain", content.length(), content);
   }
 }
