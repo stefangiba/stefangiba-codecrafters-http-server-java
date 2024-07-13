@@ -86,8 +86,6 @@ public class Main {
     return Optional.of(path);
   }
 
-  }
-
   private static String buildTextResponse(String content) {
     return buildResponse(content, "text/plain", -1);
   }
