@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,15 +22,7 @@ public class Main {
   private static final String HTTP_RESPONSE = "HTTP/1.1 200 OK\r\nContent-type: %s\r\nContent-Length: %d\r\n\r\n%s";
 
   public static void main(String[] args) throws InterruptedException, IOException {
-    if (args.length != 2 || !"--directory".equals(args[0])) {
-      throw new IllegalArgumentException("Usage: --directory <absolute path to directory to retrieve files from>");
-    }
-
-    Path directoryPath = Paths.get(args[1]);
-    if (!directoryPath.isAbsolute()) {
-      System.err.println("Error: Directory path must be absolute");
-      throw new IllegalArgumentException("Usage: --directory <absolute path to directory to retrieve files from>");
-    }
+    Optional<Path> directoryPath = getDirectoryPath(args);
 
     try (ServerSocket serverSocket = new ServerSocket(4221);
         ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -52,7 +45,11 @@ public class Main {
                 buildTextResponse(request.getHeader("User-Agent"));
               case String path when path.startsWith(PATH_FILES) -> {
                 try {
-                  Path filePath = directoryPath.resolve(path.substring(7));
+                  if (directoryPath.isEmpty()) {
+                    yield HTTP_NOT_FOUND;
+                  }
+
+                  var filePath = directoryPath.get().resolve(path.substring(7));
                   byte[] fileContent = Files.readAllBytes(filePath);
 
                   yield buildResponse(new String(fileContent, StandardCharsets.UTF_8), "application/octet-stream",
@@ -73,6 +70,22 @@ public class Main {
         });
       }
     }
+  }
+
+  private static Optional<Path> getDirectoryPath(String[] args) {
+    if (args.length != 2 || !"--directory".equals(args[0])) {
+      return Optional.empty();
+    }
+
+    var path = Paths.get(args[1]);
+
+    if (!path.isAbsolute()) {
+      return Optional.empty();
+    }
+
+    return Optional.of(path);
+  }
+
   }
 
   private static String buildTextResponse(String content) {
