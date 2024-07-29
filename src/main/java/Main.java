@@ -119,7 +119,7 @@ public class Main {
         var supportedEncoding = getSupportedEncoding(request);
         if (supportedEncoding.isPresent()) {
             headers.put("Content-Encoding", supportedEncoding.get());
-            responseContent = bytesToHex(zip(responseContent));
+            responseContent = new String(zip(responseContent));
         }
 
         headers.put("Content-Length", Integer.toString(responseContent.length()));
