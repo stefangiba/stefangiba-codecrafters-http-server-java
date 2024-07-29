@@ -65,7 +65,7 @@ public class Main {
                             default -> HttpResponse.notFound();
                         };
 
-                        outputStream.write(response.toString().getBytes());
+                        response.send(outputStream);
                     } catch (IOException | IllegalArgumentException e) {
                         e.printStackTrace();
                     }
@@ -90,8 +90,7 @@ public class Main {
 
             headers.put("Content-Length", Integer.toString(fileContent.length));
 
-            return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatusCode.OK, headers,
-                    new String(fileContent, StandardCharsets.UTF_8));
+            return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatusCode.OK, headers, fileContent);
         } catch (IOException e) {
             System.err.println(e);
 
@@ -117,14 +116,15 @@ public class Main {
         headers.put("Content-Type", "text/plain");
 
         var supportedEncoding = getSupportedEncoding(request);
+        var contentBytes = responseContent.getBytes(StandardCharsets.UTF_8);
         if (supportedEncoding.isPresent()) {
             headers.put("Content-Encoding", supportedEncoding.get());
-            responseContent = new String(zip(responseContent));
+            contentBytes = zip(responseContent);
         }
 
         headers.put("Content-Length", Integer.toString(responseContent.length()));
 
-        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatusCode.OK, headers, responseContent);
+        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatusCode.OK, headers, contentBytes);
     }
 
     private static final byte[] zip(String s) throws IOException {
