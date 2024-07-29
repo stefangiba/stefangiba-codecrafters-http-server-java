@@ -123,7 +123,7 @@ public class Main {
             contentBytes = zip(contentBytes);
         }
 
-        headers.put("Content-Length", Integer.toString(responseContent.length()));
+        headers.put("Content-Length", Integer.toString(contentBytes.length));
 
         return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatusCode.OK, headers, contentBytes);
     }
