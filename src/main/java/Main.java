@@ -17,8 +17,6 @@ import java.util.concurrent.Executors;
 import java.util.zip.GZIPOutputStream;
 
 public class Main {
-    private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.US_ASCII);
-
     private static final String[] SUPPORTED_ENCODINGS = { "gzip" };
 
     private static final String PATH_ECHO = "/echo";
@@ -129,21 +127,13 @@ public class Main {
     }
 
     private static final byte[] zip(byte[] bytes) throws IOException {
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
-            gzipOutputStream.write(bytes);
-            return byteArrayOutputStream.toByteArray();
-        }
-    }
+        var byteArrayOutputStream = new ByteArrayOutputStream();
 
-    public static String bytesToHex(byte[] bytes) {
-        byte[] hexChars = new byte[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
+            gzipOutputStream.write(bytes);
         }
-        return new String(hexChars, StandardCharsets.UTF_8);
+
+        return byteArrayOutputStream.toByteArray();
     }
 
     private static Optional<String> getSupportedEncoding(HttpRequest request) {
