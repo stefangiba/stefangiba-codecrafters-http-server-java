@@ -3,6 +3,15 @@ import java.util.Map;
 import java.util.Optional;
 
 final class HttpResponse {
+    private static final HttpResponse NOT_FOUND_HTTP_1_1 = new HttpResponse(HttpVersion.HTTP_1_1,
+            HttpStatusCode.NOT_FOUND);
+    private static final HttpResponse NOT_FOUND_HTTP_1_0 = new HttpResponse(HttpVersion.HTTP_1_0,
+            HttpStatusCode.NOT_FOUND);
+    private static final HttpResponse OK_HTTP_1_1 = new HttpResponse(HttpVersion.HTTP_1_1, HttpStatusCode.OK);
+    private static final HttpResponse OK_HTTP_1_0 = new HttpResponse(HttpVersion.HTTP_1_0, HttpStatusCode.OK);
+    private static final HttpResponse CREATED_HTTP_1_1 = new HttpResponse(HttpVersion.HTTP_1_1, HttpStatusCode.CREATED);
+    private static final HttpResponse CREATED_HTTP_1_0 = new HttpResponse(HttpVersion.HTTP_1_0, HttpStatusCode.CREATED);
+
     private static final String NEW_LINE = "\r\n";
 
     private final HttpVersion httpVersion;
@@ -53,26 +62,35 @@ final class HttpResponse {
     }
 
     static HttpResponse notFound() {
-        return notFound(HttpVersion.HTTP_1_1);
+        return NOT_FOUND_HTTP_1_1;
     }
 
     static HttpResponse notFound(HttpVersion httpVersion) {
-        return new HttpResponse(httpVersion, HttpStatusCode.NOT_FOUND);
+        return switch (httpVersion) {
+            case HTTP_1_0 -> NOT_FOUND_HTTP_1_0;
+            case HTTP_1_1 -> NOT_FOUND_HTTP_1_1;
+        };
     }
 
     static HttpResponse created() {
-        return created(HttpVersion.HTTP_1_1);
+        return CREATED_HTTP_1_1;
     }
 
     static HttpResponse created(HttpVersion httpVersion) {
-        return new HttpResponse(httpVersion, HttpStatusCode.CREATED);
+        return switch (httpVersion) {
+            case HTTP_1_0 -> CREATED_HTTP_1_0;
+            case HTTP_1_1 -> CREATED_HTTP_1_1;
+        };
     }
 
     static HttpResponse ok() {
-        return ok(HttpVersion.HTTP_1_1);
+        return OK_HTTP_1_1;
     }
 
     static HttpResponse ok(HttpVersion httpVersion) {
-        return new HttpResponse(httpVersion, HttpStatusCode.OK);
+        return switch (httpVersion) {
+            case HTTP_1_0 -> OK_HTTP_1_0;
+            case HTTP_1_1 -> OK_HTTP_1_1;
+        };
     }
 }
