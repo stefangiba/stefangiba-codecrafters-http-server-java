@@ -66,6 +66,7 @@ public class Main {
                         };
 
                         response.send(outputStream);
+                        outputStream.flush();
                     } catch (IOException | IllegalArgumentException e) {
                         e.printStackTrace();
                     }
@@ -119,16 +120,12 @@ public class Main {
         var contentBytes = responseContent.getBytes(StandardCharsets.UTF_8);
         if (supportedEncoding.isPresent()) {
             headers.put("Content-Encoding", supportedEncoding.get());
-            contentBytes = zip(responseContent);
+            contentBytes = zip(contentBytes);
         }
 
         headers.put("Content-Length", Integer.toString(responseContent.length()));
 
         return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatusCode.OK, headers, contentBytes);
-    }
-
-    private static final byte[] zip(String s) throws IOException {
-        return zip(s.getBytes());
     }
 
     private static final byte[] zip(byte[] bytes) throws IOException {
