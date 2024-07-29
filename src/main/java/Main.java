@@ -109,6 +109,7 @@ public class Main {
     private static HttpResponse buildTextResponse(String responseContent, HttpRequest request) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Length", Integer.toString(responseContent.length()));
+        headers.put("Content-Type", "text/plain");
 
         var supportedEncoding = getSupportedEncoding(request);
 
