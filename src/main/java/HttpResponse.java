@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +19,7 @@ final class HttpResponse {
     private final HttpVersion httpVersion;
     private final HttpStatusCode statusCode;
     private final Map<String, String> headers;
-    private final Optional<String> responseBody;
+    private final Optional<byte[]> responseBody;
 
     HttpResponse(HttpVersion httpVersion, HttpStatusCode statusCode) {
         this(httpVersion, statusCode, Collections.emptyMap(), null);
@@ -27,23 +29,35 @@ final class HttpResponse {
         this(httpVersion, statusCode, headers, null);
     }
 
-    HttpResponse(HttpVersion httpVersion, HttpStatusCode statusCode, Map<String, String> headers, String responseBody) {
+    HttpResponse(HttpVersion httpVersion, HttpStatusCode statusCode, Map<String, String> headers, byte[] responseBody) {
         this.httpVersion = httpVersion;
         this.statusCode = statusCode;
         this.headers = Collections.unmodifiableMap(headers);
         this.responseBody = Optional.ofNullable(responseBody);
     }
 
-    @Override
-    public String toString() {
+    void send(OutputStream outputStream) throws IOException {
         var sb = new StringBuilder();
+        writeRequestLine(sb);
+        writeHeaders(sb);
+
+        outputStream.write(sb.toString().getBytes());
+
+        if (responseBody.isPresent()) {
+            outputStream.write(responseBody.get());
+        }
+    }
+
+    private void writeRequestLine(StringBuilder sb) {
         sb.append(httpVersion.toString());
         sb.append(' ');
         sb.append(statusCode.getCode());
         sb.append(' ');
         sb.append(statusCode.toString());
         sb.append(NEW_LINE);
+    }
 
+    private void writeHeaders(StringBuilder sb) {
         headers.forEach((headerName, value) -> {
             sb.append(headerName);
             sb.append(':');
@@ -53,12 +67,6 @@ final class HttpResponse {
         });
 
         sb.append(NEW_LINE);
-
-        if (responseBody.isPresent()) {
-            sb.append(responseBody.get());
-        }
-
-        return sb.toString();
     }
 
     static HttpResponse notFound() {
