@@ -1,3 +1,5 @@
+package com.stefangiba.http.model;
+
 public enum HttpMethod {
     GET("GET"),
     POST("POST"),

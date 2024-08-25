@@ -1,3 +1,5 @@
+package com.stefangiba.http;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +17,11 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.GZIPOutputStream;
+
+import com.stefangiba.http.model.HttpRequest;
+import com.stefangiba.http.model.HttpResponse;
+import com.stefangiba.http.model.HttpStatusCode;
+import com.stefangiba.http.model.HttpVersion;
 
 public class Main {
     private static final String[] SUPPORTED_ENCODINGS = { "gzip" };

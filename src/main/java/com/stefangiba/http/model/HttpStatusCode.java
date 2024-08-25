@@ -1,4 +1,6 @@
-enum HttpStatusCode {
+package com.stefangiba.http.model;
+
+public enum HttpStatusCode {
     OK(200),
     CREATED(201),
     NOT_FOUND(404);

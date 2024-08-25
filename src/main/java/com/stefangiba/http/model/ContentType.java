@@ -1,3 +1,5 @@
+package com.stefangiba.http.model;
+
 enum ContentType {
     TEXT_PLAIN("text/plain"),
     APPLICATION_OCTET_STREAM("application/octet-stream");

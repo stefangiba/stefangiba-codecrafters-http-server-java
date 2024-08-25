@@ -1,10 +1,12 @@
+package com.stefangiba.http.model;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-final class HttpResponse {
+public final class HttpResponse {
     private static final HttpResponse NOT_FOUND_HTTP_1_1 = new HttpResponse(HttpVersion.HTTP_1_1,
             HttpStatusCode.NOT_FOUND);
     private static final HttpResponse NOT_FOUND_HTTP_1_0 = new HttpResponse(HttpVersion.HTTP_1_0,
@@ -21,22 +23,23 @@ final class HttpResponse {
     private final Map<String, String> headers;
     private final Optional<byte[]> responseBody;
 
-    HttpResponse(HttpVersion httpVersion, HttpStatusCode statusCode) {
+    public HttpResponse(HttpVersion httpVersion, HttpStatusCode statusCode) {
         this(httpVersion, statusCode, Collections.emptyMap(), null);
     }
 
-    HttpResponse(HttpVersion httpVersion, HttpStatusCode statusCode, Map<String, String> headers) {
+    public HttpResponse(HttpVersion httpVersion, HttpStatusCode statusCode, Map<String, String> headers) {
         this(httpVersion, statusCode, headers, null);
     }
 
-    HttpResponse(HttpVersion httpVersion, HttpStatusCode statusCode, Map<String, String> headers, byte[] responseBody) {
+    public HttpResponse(HttpVersion httpVersion, HttpStatusCode statusCode, Map<String, String> headers,
+            byte[] responseBody) {
         this.httpVersion = httpVersion;
         this.statusCode = statusCode;
         this.headers = Collections.unmodifiableMap(headers);
         this.responseBody = Optional.ofNullable(responseBody);
     }
 
-    void send(OutputStream outputStream) throws IOException {
+    public void send(OutputStream outputStream) throws IOException {
         var sb = new StringBuilder();
         writeRequestLine(sb);
         writeHeaders(sb);
@@ -69,33 +72,35 @@ final class HttpResponse {
         sb.append(NEW_LINE);
     }
 
-    static HttpResponse notFound() {
+    public static HttpResponse notFound() {
         return NOT_FOUND_HTTP_1_1;
     }
 
-    static HttpResponse notFound(HttpVersion httpVersion) {
+    public static HttpResponse
+
+            notFound(HttpVersion httpVersion) {
         return switch (httpVersion) {
             case HTTP_1_0 -> NOT_FOUND_HTTP_1_0;
             case HTTP_1_1 -> NOT_FOUND_HTTP_1_1;
         };
     }
 
-    static HttpResponse created() {
+    public static HttpResponse created() {
         return CREATED_HTTP_1_1;
     }
 
-    static HttpResponse created(HttpVersion httpVersion) {
+    public static HttpResponse created(HttpVersion httpVersion) {
         return switch (httpVersion) {
             case HTTP_1_0 -> CREATED_HTTP_1_0;
             case HTTP_1_1 -> CREATED_HTTP_1_1;
         };
     }
 
-    static HttpResponse ok() {
+    public static HttpResponse ok() {
         return OK_HTTP_1_1;
     }
 
-    static HttpResponse ok(HttpVersion httpVersion) {
+    public static HttpResponse ok(HttpVersion httpVersion) {
         return switch (httpVersion) {
             case HTTP_1_0 -> OK_HTTP_1_0;
             case HTTP_1_1 -> OK_HTTP_1_1;
