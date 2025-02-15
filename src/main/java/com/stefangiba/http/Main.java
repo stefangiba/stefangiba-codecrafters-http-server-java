@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.GZIPOutputStream;
 
+import com.stefangiba.http.model.ContentType;
 import com.stefangiba.http.model.HttpRequest;
 import com.stefangiba.http.model.HttpResponse;
 import com.stefangiba.http.model.HttpStatusCode;
@@ -59,11 +60,11 @@ public class Main {
                                 }
 
                                 var directoryPath = directoryPathOpt.get();
+                                var filePath = directoryPath.resolve(path.substring(7));
 
                                 yield switch (request.getHttpMethod()) {
-                                    case GET -> retrieveFile(directoryPath, path.substring(7), request);
-                                    case POST ->
-                                        writeRequestBodyToFile(directoryPath, path.substring(7), request.getBody());
+                                    case GET -> retrieveFile(filePath, request);
+                                    case POST -> writeRequestBodyToFile(filePath, request);
                                     default -> HttpResponse.notFound();
                                 };
                             }
@@ -80,13 +81,12 @@ public class Main {
         }
     }
 
-    private static HttpResponse retrieveFile(Path directoryPath, String filePathStr, HttpRequest request) {
+    private static HttpResponse retrieveFile(Path filePath, HttpRequest request) {
         try {
-            var filePath = directoryPath.resolve(filePathStr);
             byte[] fileContent = Files.readAllBytes(filePath);
 
             Map<String, String> headers = new HashMap<>();
-            headers.put("Content-Type", "application/octet-stream");
+            headers.put("Content-Type", ContentType.APPLICATION_OCTET_STREAM.toString());
 
             var supportedEncoding = getSupportedEncoding(request);
             if (supportedEncoding.isPresent()) {
@@ -104,10 +104,9 @@ public class Main {
         }
     }
 
-    private static HttpResponse writeRequestBodyToFile(Path directoryPath, String filePathStr, String content) {
+    private static HttpResponse writeRequestBodyToFile(Path filePath, HttpRequest request) {
         try {
-            var filePath = directoryPath.resolve(filePathStr);
-            Files.write(filePath, content.getBytes());
+            Files.write(filePath, request.getBody().getBytes());
 
             return HttpResponse.created();
         } catch (IOException e) {
@@ -119,7 +118,7 @@ public class Main {
 
     private static HttpResponse buildTextResponse(String responseContent, HttpRequest request) throws IOException {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "text/plain");
+        headers.put("Content-Type", ContentType.TEXT_PLAIN.toString());
 
         var supportedEncoding = getSupportedEncoding(request);
         var contentBytes = responseContent.getBytes(StandardCharsets.UTF_8);

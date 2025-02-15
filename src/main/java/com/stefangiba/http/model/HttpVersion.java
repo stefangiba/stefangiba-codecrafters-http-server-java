@@ -21,7 +21,7 @@ public enum HttpVersion {
         } else if (HTTP_1_1.name.equals(name)) {
             return HTTP_1_1;
         } else {
-            throw new IllegalArgumentException("Unknown HTTP version: " + name);
+            throw new IllegalArgumentException("Unsupported HTTP version: " + name);
         }
     }
 }

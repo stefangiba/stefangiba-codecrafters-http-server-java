@@ -76,9 +76,7 @@ public final class HttpResponse {
         return NOT_FOUND_HTTP_1_1;
     }
 
-    public static HttpResponse
-
-            notFound(HttpVersion httpVersion) {
+    public static HttpResponse notFound(HttpVersion httpVersion) {
         return switch (httpVersion) {
             case HTTP_1_0 -> NOT_FOUND_HTTP_1_0;
             case HTTP_1_1 -> NOT_FOUND_HTTP_1_1;
